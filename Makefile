@@ -24,6 +24,10 @@ migrate:
 tinker:
 	docker exec -it laravel_app php artisan tinker
 
+# Laravel test
+test:
+	docker exec laravel_app php artisan test
+
 # Show live logs
 logs:
 	docker compose logs -f
