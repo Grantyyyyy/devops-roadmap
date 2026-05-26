@@ -1,0 +1,16 @@
+# Laravel secrets
+backend/.env
+backend/vendor/
+backend/storage/logs/*
+backend/bootstrap/cache/*
+
+# React
+frontend/node_modules/
+frontend/dist/
+
+# Docker
+.docker/
+
+# System
+.DS_Store
+*.log

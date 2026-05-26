@@ -1,0 +1,44 @@
+services:
+  app:
+    build: ./backend
+    container_name: laravel_app
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - db
+      - cache
+
+  web:
+    image: nginx:alpine
+    container_name: laravel_web
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8
+    container_name: laravel_db
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_PASSWORD: secret
+      MYSQL_USER: laravel
+    volumes:
+      - db_data:/var/lib/mysql
+
+  cache:
+    image: redis:7-alpine
+    container_name: laravel_cache
+
+  frontend:
+    build: ./frontend
+    container_name: react_frontend
+    ports:
+    - "3000:80"
+
+volumes:
+  db_data:
