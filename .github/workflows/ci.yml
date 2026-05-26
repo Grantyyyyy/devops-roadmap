@@ -5,6 +5,7 @@ on:
     branches: [develop]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   test-backend:
@@ -39,7 +40,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: "8.3"
           extensions: mbstring, pdo, pdo_mysql, zip
 
       - name: Cache Composer packages
