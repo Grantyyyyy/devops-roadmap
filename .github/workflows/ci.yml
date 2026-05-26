@@ -1,0 +1,80 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-backend:
+    name: Laravel Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: laravel
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_PASSWORD: secret
+          MYSQL_USER: laravel
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, pdo_mysql, zip
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+
+      - name: Install dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Copy environment file
+        working-directory: backend
+        run: cp .env.example .env
+
+      - name: Update .env for CI
+        working-directory: backend
+        run: |
+          sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/' .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=laravel" >> .env
+          echo "DB_USERNAME=laravel" >> .env
+          echo "DB_PASSWORD=secret" >> .env
+          echo "REDIS_HOST=127.0.0.1" >> .env
+
+      - name: Generate app key
+        working-directory: backend
+        run: php artisan key:generate
+
+      - name: Run migrations
+        working-directory: backend
+        run: php artisan migrate --force
+
+      - name: Run tests
+        working-directory: backend
+        run: php artisan test
