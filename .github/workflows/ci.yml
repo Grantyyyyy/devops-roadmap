@@ -106,3 +106,25 @@ jobs:
       - name: Build for production
         working-directory: frontend
         run: npm run build
+
+    larastan:
+    name: Larastan Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, pdo_mysql, zip
+
+      - name: Install dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run Larastan
+        working-directory: backend
+        run: ./vendor/bin/phpstan analyse --no-progress
