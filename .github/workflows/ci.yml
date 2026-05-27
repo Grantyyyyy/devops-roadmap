@@ -107,7 +107,7 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-    larastan:
+  larastan:
     name: Larastan Static Analysis
     runs-on: ubuntu-latest
 
@@ -118,7 +118,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: "8.3"
           extensions: mbstring, pdo, pdo_mysql, zip
 
       - name: Install dependencies
