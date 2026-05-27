@@ -53,3 +53,35 @@ clear:
 	docker exec laravel_app php artisan config:clear
 	docker exec laravel_app php artisan route:clear
 	docker exec laravel_app php artisan view:clear
+
+# ─── Staging ───────────────────────────────────────
+
+# Build staging images
+staging-build:
+	docker build -t devops-roadmap-app:staging ./backend
+	docker build -t devops-roadmap-frontend:staging ./frontend
+
+# Start staging environment
+staging-up:
+	docker compose -f docker-compose.staging.yml up -d
+
+# Stop staging environment
+staging-down:
+	docker compose -f docker-compose.staging.yml down
+
+# Run migrations on staging
+staging-migrate:
+	docker exec staging_laravel_app php artisan migrate --force
+
+# View staging logs
+staging-logs:
+	docker compose -f docker-compose.staging.yml logs -f
+
+# Full staging deploy (build + start + migrate)
+staging-deploy:
+	docker build -t devops-roadmap-app:staging ./backend
+	docker build -t devops-roadmap-frontend:staging ./frontend
+	docker compose -f docker-compose.staging.yml down
+	docker compose -f docker-compose.staging.yml up -d
+	sleep 5
+	docker exec staging_laravel_app php artisan migrate --force
