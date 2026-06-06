@@ -128,3 +128,34 @@ jobs:
       - name: Run Larastan
         working-directory: backend
         run: ./vendor/bin/phpstan analyse --no-progress
+
+  push-images:
+    name: Push Images to GHCR
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, larastan]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Laravel image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ghcr.io/grantyyyyy/devops-roadmap-app:latest
+
+      - name: Build and push React image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ghcr.io/grantyyyyy/devops-roadmap-frontend:latest
