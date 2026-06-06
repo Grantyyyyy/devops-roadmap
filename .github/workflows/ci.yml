@@ -163,3 +163,45 @@ jobs:
           context: ./frontend
           push: true
           tags: ghcr.io/grantyyyyy/devops-roadmap-frontend:latest
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [push-images]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Pull latest images
+        run: |
+          docker pull ghcr.io/grantyyyyy/devops-roadmap-app:latest
+          docker pull ghcr.io/grantyyyyy/devops-roadmap-frontend:latest
+
+      - name: Tag images for staging
+        run: |
+          docker tag ghcr.io/grantyyyyy/devops-roadmap-app:latest devops-roadmap-app:staging
+          docker tag ghcr.io/grantyyyyy/devops-roadmap-frontend:latest devops-roadmap-frontend:staging
+
+      - name: Deploy staging
+        run: |
+          docker compose -f docker-compose.staging.yml down
+          docker compose -f docker-compose.staging.yml up -d
+
+      - name: Run migrations
+        run: |
+          sleep 5
+          docker exec staging_laravel_app php artisan migrate --force
+
+      - name: Verify deployment
+        run: |
+          docker ps | grep staging
+          echo "✅ Staging deployed successfully!"
