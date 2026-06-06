@@ -135,6 +135,10 @@ jobs:
     needs: [test-backend, test-frontend, larastan]
     if: github.ref == 'refs/heads/main'
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
