@@ -85,3 +85,18 @@ staging-deploy:
 	docker compose -f docker-compose.staging.yml up -d
 	sleep 5
 	docker exec staging_laravel_app php artisan migrate --force
+
+
+# ─── Monitoring ───────────────────────────────────────
+
+# Start monitoring containers
+monitoring-up:
+	docker compose -f docker-compose.monitoring.yml up -d
+
+# Stop monitoring containers
+monitoring-down:
+	docker compose -f docker-compose.monitoring.yml down
+
+# View monitoring logs
+monitoring-logs:
+	docker compose -f docker-compose.monitoring.yml logs -f
